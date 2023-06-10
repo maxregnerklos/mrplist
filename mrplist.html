@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>PropertyTree Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+
+        h1 {
+            color: #007acc;
+            text-align: center;
+        }
+
+        #editor {
+            width: 100%;
+            height: 400px;
+            background-color: #ffffff;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            padding: 5px;
+            font-family: monospace;
+        }
+
+        #fileList {
+            list-style: none;
+            padding: 0;
+        }
+
+        #fileList li {
+            margin-bottom: 5px;
+        }
+
+        #fileList li a {
+            text-decoration: none;
+            color: #007acc;
+            cursor: pointer;
+        }
+
+        #newButton {
+            background-color: #007acc;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        #newButton:hover {
+            background-color: #005d8f;
+        }
+
+        #newModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        #newModalContent {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        #newModalContent input {
+            margin-bottom: 10px;
+        }
+
+        #newModalContent button {
+            margin-top: 10px;
+            background-color: #007acc;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        #newModalContent button:hover {
+            background-color: #005d8f;
+        }
+
+        .property {
+            margin-bottom: 5px;
+        }
+
+        .property label {
+            display: inline-block;
+            width: 100px;
+            color: #007acc;
+        }
+
+        .property input[type="text"], .property input[type="number"] {
+            width: 200px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        .property input[type="checkbox"] {
+            margin-left: 100px;
+        }
+
+        .property input[type="button"] {
+            margin-left: 100px;
+            background-color: #007acc;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .property input[type="button"]:hover {
+            background-color: #005d8f;
+        }
+
+        #saveButton {
+            background-color: #007acc;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        #saveButton:hover {
+            background-color: #005d8f;
+        }
+
+        #deleteButton {
+            background-color: #ff0000;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        #deleteButton:hover {
+            background-color: #cc0000;
+        }
+
+        #renameButton {
+            background-color: #007acc;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        #renameButton:hover {
+            background-color: #005d8f;
+        }
+
+        #copyButton {
+            background-color: #007acc;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        #copyButton:hover {
+            background-color: #005d8f;
+        }
+
+        #searchBar {
+            width: 200px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            padding: 5px;
+            margin-right: 10px;
+        }
+
+        #sortButton {
+            background-color: #007acc;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        #sortButton:hover {
+            background-color: #005d8f;
+        }
+
+        #validateButton {
+            background-color: #007acc;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        #validateButton:hover {
+            background-color: #005d8f;
+        }
+
+        #helpButton {
+            background-color: #007acc;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        #helpButton:hover {
+            background-color: #005d8f;
+        }
+    </style>
+</head>
+<body>
+    <h1>PropertyTree Editor</h1>
+    <div>
+        <button id="newButton">New File</button>
+        <ul id="fileList"></ul>
+    </div>
+    <div>
+        <div>
+            <button id="saveButton">Save</button>
+            <button id="deleteButton">Delete</button>
+            <button id="renameButton">Rename</button>
+            <button id="copyButton">Copy</button>
+            <input type="text" id="searchBar" placeholder="Search...">
+            <button id="sortButton">Sort</button>
+            <button id="validateButton">Validate</button>
+            <button id="helpButton">Help</button>
+        </div>
+        <h2 id="fileName"></h2>
+        <div>
+            <textarea id="editor"></textarea>
+        </div>
+        <div id="properties"></div>
+    </div>
+    <div id="newModal">
+        <div id="newModalContent">
+            <h2>New File</h2>
+            <div class="property">
+                <label for="newFileName">File Name:</label>
+                <input type="text" id="newFileName">
+            </div>
+            <div class="property">
+                <label for="newFileContent">File Content:</label>
+                <textarea id="newFileContent"></textarea>
+            </div>
+            <div>
+                <button id="newFileSave">Save</button>
+                <button id="modalClose">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const editorTextarea = document.getElementById('editor');
+        const fileList = document.getElementById('fileList');
+        const newButton = document.getElementById('newButton');
+        const newModal = document.getElementById('newModal');
+        const modalClose = document.getElementById('modalClose');
+        const newFileName = document.getElementById('newFileName');
+        const newFileContent = document.getElementById('newFileContent');
+        const fileName = document.getElementById('fileName');
+        const properties = document.getElementById('properties');
+        const saveButton = document.getElementById('saveButton');
+        const deleteButton = document.getElementById('deleteButton');
+        const renameButton = document.getElementById('renameButton');
+        const copyButton = document.getElementById('copyButton');
+        const searchBar = document.getElementById('searchBar');
+        const sortButton = document.getElementById('sortButton');
+        const validateButton = document.getElementById('validateButton');
+        const helpButton = document.getElementById('helpButton');
+        const files = {};
+
+        function updateFileList() {
+            fileList.innerHTML = '';
+            for (const fileName in files) {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.innerText = fileName;
+                a.addEventListener('click', () => {
+                    loadFile(fileName);
+                });
+                li.appendChild(a);
+                fileList.appendChild(li);
+            }
+        }
+
+        function loadFile(fileName) {
+            const fileContent = files[fileName];
+            fileName.innerText = fileName;
+            editorTextarea.value = fileContent;
+            properties.innerHTML = '';
+            const jsonContent = JSON.parse(fileContent);
+            for (const key in jsonContent) {
+                const value = jsonContent[key];
+                const div = document.createElement('div');
+                div.classList.add('property');
+                const label = document.createElement('label');
+                label.innerText = key + ':';
+                div.appendChild(label);
+                if (typeof value === 'string' || typeof value === 'number') {
+                    const input = document.createElement('input');
+                    input.type = typeof value === 'string' ? 'text' : 'number';
+                    input.value = value;
+                    input.addEventListener('change', () => {
+                        jsonContent[key] = input.value;
+                    });
+                    div.appendChild(input);
+                } else if (typeof value === 'boolean') {
+                    const input = document.createElement('input');
+                    input.type = 'checkbox';
+                    input.checked = value;
+                    input.addEventListener('change', () => {
+                        jsonContent[key] = input.checked;
+                    });
+                    div.appendChild(input);
+                } else if (Array.isArray(value)) {
+                    const addButton = document.createElement('input');
+                    addButton.type = 'button';
+                    addButton.value = 'Add Item';
+                    addButton.addEventListener('click', () => {
+                        value.push('');
+                        loadFile(fileName);
+                    });
+                    div.appendChild(addButton);
+                    for (let i = 0; i < value.length; i++) {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.value = value[i];
+                        input.addEventListener('change', () => {
+                            value[i] = input.value;
+                        });
+                        div.appendChild(input);
+                    }
+                } else if (typeof value === 'object') {
+                    const addButton = document.createElement('input');
+                    addButton.type = 'button';
+                    addButton.value = 'Add Property';
+                    addButton.addEventListener('click', () => {
+                        jsonContent[key]['new_property'] = '';
+                        loadFile(fileName);
+                    });
+                    div.appendChild(addButton);
+                    for (const subKey in value) {
+                        const subValue = value[subKey];
+                        const subDiv = document.createElement('div');
+                        subDiv.classList.add('property');
+                        const subLabel = document.createElement('label');
+                        subLabel.innerText = subKey + ':';
+                        subDiv.appendChild(subLabel);
+                        const subInput = document.createElement('input');
+                        subInput.type = 'text';
+                        subInput.value = subValue;
+                        subInput.addEventListener('change', () => {
+                            jsonContent[key][subKey] = subInput.value;
+                        });
+                        subDiv.appendChild(subInput);
+                        const deleteButton = document.createElement('input');
+                        deleteButton.type = 'button';
+                        deleteButton.value = 'Delete';
+                        deleteButton.addEventListener('click', () => {
+                            delete jsonContent[key][subKey];
+                            loadFile(fileName);
+                        });
+                        subDiv.appendChild(deleteButton);
+                        div.appendChild(subDiv);
+                    }
+                }
+                properties.appendChild(div);
+            }
+        }
+
+        function saveFile(fileName, fileContent) {
+            files[fileName] = fileContent;
+            updateFileList();
+            loadFile(fileName);
+        }
+
+        function deleteFile(fileName) {
+            delete files[fileName];
+            updateFileList();
+            fileName.innerText = '';
+            editorTextarea.value = '';
+            properties.innerHTML = '';
+        }
+
+        function renameFile(fileName) {
+            const newFileName = prompt('Enter new file name:');
+            if (newFileName) {
+                files[newFileName] = files[fileName];
+                delete files[fileName];
+                updateFileList();
+                loadFile(newFileName);
+            }
+        }
+
+        function copyFile(fileName) {
+            const newFileName = prompt('Enter new file name:');
+            if (newFileName) {
+                files[newFileName] = files[fileName];
+                updateFileList();
+            }
+        }
+
+        function searchProperty() {
+            const searchTerm = searchBar.value.toLowerCase();
+            const propertiesList = properties.querySelectorAll('.property');
+            propertiesList.forEach(property => {
+                const label = property.querySelector('label').innerText.toLowerCase();
+                if (label.includes(searchTerm)) {
+                    property.style.display = 'block';
+                } else {
+                    property.style.display = 'none';
+                }
+            });
+        }
+
+        function sortProperties() {
+            const jsonContent = JSON.parse(editorTextarea.value);
+            const sortedJsonContent = {};
+            Object.keys(jsonContent).sort().forEach(key => {
+                sortedJsonContent[key] = jsonContent[key];
+            });
+            editorTextarea.value = JSON.stringify(sortedJsonContent, null, 4);
+            loadFile(fileName.innerText);
+        }
+
+        function validateJson() {
+            try {
+                JSON.parse(editorTextarea.value);
+                alert('Valid JSON!');
+            } catch (error) {
+                alert('Invalid JSON!');
+            }
+        }
+
+        function displayHelp() {
+            alert('Instructions:\n\n- Use the "New File" button to create a new file.\n- Use the file list to select a file to edit.\n- Use the "Save" button to save changes made to the file.\n- Use the "Delete" button to delete the current file.\n- Use the "Rename" button to rename the current file.\n- Use the "Copy" button to create a copy of the current file.\n- Use the search bar to search for a specific property in the file.\n- Use the "Sort" button to sort the properties alphabetically.\n- Use the "Validate" button to check if the file is valid JSON.\n- Use the "Help" button to display these instructions again.');
+        }
+
+        newButton.addEventListener('click', () => {
+            newModal.style.display = 'flex';
+        });
+
+        modalClose.addEventListener('click', () => {
+            newModal.style.display = 'none';
+        });
+
+        newFileSave.addEventListener('click', () => {
+            const fileName = newFileName.value;
+            const fileContent = newFileContent.value;
+            saveFile(fileName, fileContent);
+            newModal.style.display = 'none';
+        });
+
+        saveButton.addEventListener('click', () => {
+            const fileName = document.getElementById('fileName').innerText;
+            const fileContent = editorTextarea.value;
+            saveFile(fileName, fileContent);
+        });
+
+        deleteButton.addEventListener('click', () => {
+            const fileName = document.getElementById('fileName').innerText;
+            if (confirm(`Are you sure you want to delete ${fileName}?`)) {
+                deleteFile(fileName);
+            }
+        });
+
+        renameButton.addEventListener('click', () => {
+            const fileName = document.getElementById('fileName').innerText;
+            renameFile(fileName);
+        });
+
+        copyButton.addEventListener('click', () => {
+            const fileName = document.getElementById('fileName').innerText;
+            copyFile(fileName);
+        });
+
+        searchBar.addEventListener('input', () => {
+            searchProperty();
+        });
+
+        sortButton.addEventListener('click', () => {
+            sortProperties();
+        });
+
+        validateButton.addEventListener('click', () => {
+            validateJson();
+        });
+
+        helpButton.addEventListener('click', () => {
+            displayHelp();
+        });
+
+        saveFile('example.json', '{"name": "John Doe", "age": 30, "address": {"street": "123 Main St", "city": "Anytown", "state": "CA", "zip": "12345"}}');
+    </script>
+</body>
+</html>
